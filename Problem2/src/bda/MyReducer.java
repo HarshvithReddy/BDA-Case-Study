@@ -1,22 +1,54 @@
-import java.io.*;
+import java.io.IOException;
+
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Reducer;
 
-public class MyReducer extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+public class ZoneConsumptionReducer
+        extends Reducer<Text, Text, Text, Text> {
 
     @Override
-    public void reduce(Text key, Iterable<DoubleWritable> values, Context context)
+    protected void reduce(Text key, Iterable<Text> values,
+                           Context context)
             throws IOException, InterruptedException {
 
-        double maxPercentage = 0.0;
+        double totalConsumption = 0;
+        double sanctionedLoad = 0;
+        String zoneName = "";
 
-        for (DoubleWritable value : values) {
+        for (Text value : values) {
 
-            if (value.get() > maxPercentage) {
-                maxPercentage = value.get();
-            }
+            String[] parts = value.toString().split(",");
+
+            zoneName = parts[0];
+
+            double consumption =
+                    Double.parseDouble(parts[1]);
+
+            sanctionedLoad =
+                    Double.parseDouble(parts[2]);
+
+            totalConsumption += consumption;
         }
 
-        context.write(key, new DoubleWritable(maxPercentage));
+        double difference =
+                totalConsumption - sanctionedLoad;
+
+        String status;
+
+        if (difference > 0)
+            status = "EXCEEDING";
+        else
+            status = "WITHIN LIMIT";
+
+        String output =
+                "Total Consumption: " + totalConsumption +
+                " | Sanctioned Load: " + sanctionedLoad +
+                " | Difference: " + difference +
+                " | " + status;
+
+        context.write(
+            new Text(zoneName),
+            new Text(output)
+        );
     }
 }
