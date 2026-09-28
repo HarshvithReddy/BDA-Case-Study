@@ -1,220 +1,74 @@
 ========================================================================================================
-CBIT - DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
-BIG DATA ANALYTICS (22CSE19 PE-I) - END-TO-END BIG DATA ANALYTICS CASE STUDY
-TEAM 8: VoltGrid Utilities — Smart Grid Energy Analytics
-PROBLEM 2: Which zone is operating closest to, or exceeding, its sanctioned load limit?
-=======================================================================================
-
+  CBIT - DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
+  BIG DATA ANALYTICS (22CSE19 PE-I) - END-TO-END BIG DATA ANALYTICS CASE STUDY
+  TEAM 8: VoltGrid Utilities — Smart Grid Energy Analytics
+  PROBLEM 4: Which zones are exceeding their sanctioned load?
 ========================================================================================================
 
-1. EXECUTIVE SUMMARY & BUSINESS METRICS
-   ========================================================================================================
-
----
-
-## Zone Name       Zone Code    Sanctioned Load    Max Operating Load    Max Load %       Status
-
-West Zone       Z04          800 MW             550 MW                68.75%           Closest
-South Zone      Z02          700 MW             480 MW                68.57%           High
-East Zone       Z03          600 MW             400 MW                66.67%           High
-North Zone      Z01          500 MW             280 MW                56.00%           Moderate
-Central Zone    Z05          1000 MW            500 MW                50.00%           Lowest
----------------------------------------------------------------------------------------------
-
-HIGHEST USAGE:
-Z04 - West Zone - 68.75%
-
----
-
-========================================================================================================
-2. DETAILED ZONE-WISE LOAD BREAKDOWN
-====================================
-
----
-
-## ZONE: NORTH ZONE (Z01)
-
-Sanctioned Load       : 500 MW
-Maximum Operating Load: 280 MW
-Load Percentage       : (280 / 500) × 100
-Zone Load Usage       : 56.00%
-
----
-
-## ZONE: SOUTH ZONE (Z02)
-
-Sanctioned Load       : 700 MW
-Maximum Operating Load: 480 MW
-Load Percentage       : (480 / 700) × 100
-Zone Load Usage       : 68.57%
-
----
-
-## ZONE: EAST ZONE (Z03)
-
-Sanctioned Load       : 600 MW
-Maximum Operating Load: 400 MW
-Load Percentage       : (400 / 600) × 100
-Zone Load Usage       : 66.67%
-
----
-
-## ZONE: WEST ZONE (Z04)
-
-Sanctioned Load       : 800 MW
-Maximum Operating Load: 550 MW
-Load Percentage       : (550 / 800) × 100
-Zone Load Usage       : 68.75%
-
----
-
-## ZONE: CENTRAL ZONE (Z05)
-
-Sanctioned Load       : 1000 MW
-Maximum Operating Load: 500 MW
-Load Percentage       : (500 / 1000) × 100
-Zone Load Usage       : 50.00%
-
----
-
-========================================================================================================
-3. MAPREDUCE PROCESSING
-=======================
-
----
-
-## MAPPER
-
-* Reads electricity readings from readings.csv.
-* Reads sanctioned load information from zones.csv.
-* Identifies the zone code for each reading.
-* Calculates the load percentage for each reading.
-* Emits:
-
-  ```
-    Zone Code  →  Load Percentage
-  ```
-
----
-
-## REDUCER
-
-* Receives all load percentages for each zone.
-* Finds the maximum load percentage for each zone.
-* Emits:
-
-  ```
-    Zone Code  →  Maximum Load Percentage
-  ```
-
----
-
-========================================================================================================
-4. RAW HADOOP MAPREDUCE OUTPUT
-==============================
-
-HDFS OUTPUT PATH:
-/output/problem2/part-r-00000
-
----
-
-Z01     56.00000000000001
-Z02     68.57142857142857
-Z03     66.66666666666666
-Z04     68.75
-Z05     50.0
-
----
-
-========================================================================================================
-5. HADOOP EXECUTION
-===================
-
----
-
-## STEP 1: COMPILE JAVA PROGRAMS
-
-Command:
-
-javac -cp "$(hadoop classpath)" MyMapper.java MyReducer.java Driver.java
-
----
-
-## STEP 2: CREATE JAR FILE
-
-Command:
-
-jar -cvf zone-load.jar MyMapper.class MyReducer.class Driver.class
-
----
-
-## STEP 3: CHECK HDFS INPUT FILES
-
-Command:
-
-hdfs dfs -ls /input/voltgrid
-
-Input Files:
-
-/input/voltgrid/readings.csv
-/input/voltgrid/zones.csv
-
----
-
-## STEP 4: REMOVE PREVIOUS OUTPUT
-
-Command:
-
-hdfs dfs -rm -r -f /output/problem2
-
----
-
-## STEP 5: RUN MAPREDUCE JOB
-
-Command:
-
-hadoop jar zone-load.jar Driver
-
----
-
-## STEP 6: DISPLAY HADOOP OUTPUT
-
-Command:
-
-hdfs dfs -cat /output/problem2/part-r-00000
-
----
-
-## EXECUTION RESULT
-
-Map Input Records       : 46
-Map Output Records      : 45
-Reduce Input Groups     : 5
-Reduce Output Records   : 5
-Job Status              : Successfully Completed
-
----
-
-========================================================================================================
-6. FINAL RESULT
-===============
-
----
-
-## ZONE OPERATING CLOSEST TO SANCTIONED LOAD LIMIT
-
-Z04 - West Zone - 68.75%
-
----
-
-West Zone has the highest operating-load percentage among the five zones
-and is therefore operating closest to its sanctioned load limit.
-
-No zone exceeds its sanctioned load limit because all calculated
-percentages are below 100%.
-
----
-
-========================================================================================================
-END OF PROBLEM 2
-================
+1. EXECUTIVE SUMMARY & BUSINESS METRICS:
+--------------------------------------------------------------------------------------------------------
+Zone Name       Zone Code  Sanctioned Load  Total Consumption  Difference  Status
+--------------------------------------------------------------------------------------------------------
+Central Zone    Z05        1000 MW          3310.00 units      2310.00     EXCEEDING
+West Zone       Z04         800 MW          3100.00 units      2300.00     EXCEEDING
+South Zone      Z02         700 MW          2850.00 units      2150.00     EXCEEDING
+East Zone       Z03         600 MW          2300.00 units      1700.00     EXCEEDING
+North Zone      Z01         500 MW          1760.00 units      1260.00     EXCEEDING
+--------------------------------------------------------------------------------------------------------
+TOTAL CLUSTER:             3600 MW         13320.00 units      9720.00     ALL ZONES EXCEEDING
+--------------------------------------------------------------------------------------------------------
+
+2. DETAILED ZONE-LEVEL LOAD COMPARISON:
+--------------------------------------------------------------------------------------------------------
+Zone: North Zone (Z01) | Sanctioned Load: 500 MW
+  - Total Consumption = 1760.00 units
+  - Sanctioned Load   = 500.00 MW
+  - Difference        = 1760.00 - 500.00 = 1260.00
+  >> Status = EXCEEDING
+
+Zone: South Zone (Z02) | Sanctioned Load: 700 MW
+  - Total Consumption = 2850.00 units
+  - Sanctioned Load   = 700.00 MW
+  - Difference        = 2850.00 - 700.00 = 2150.00
+  >> Status = EXCEEDING
+
+Zone: East Zone (Z03) | Sanctioned Load: 600 MW
+  - Total Consumption = 2300.00 units
+  - Sanctioned Load   = 600.00 MW
+  - Difference        = 2300.00 - 600.00 = 1700.00
+  >> Status = EXCEEDING
+
+Zone: West Zone (Z04) | Sanctioned Load: 800 MW
+  - Total Consumption = 3100.00 units
+  - Sanctioned Load   = 800.00 MW
+  - Difference        = 3100.00 - 800.00 = 2300.00
+  >> Status = EXCEEDING
+
+Zone: Central Zone (Z05) | Sanctioned Load: 1000 MW
+  - Total Consumption = 3310.00 units
+  - Sanctioned Load   = 1000.00 MW
+  - Difference        = 3310.00 - 1000.00 = 2310.00
+  >> Status = EXCEEDING
+
+3. RAW HADOOP MAPREDUCE OUTPUT (from HDFS /output/problem4/part-r-00000):
+--------------------------------------------------------------------------------------------------------
+Z01    North Zone	Total Consumption: 1760.0 | Sanctioned Load: 500.0 | Difference: 1260.0 | EXCEEDING
+Z02    South Zone	Total Consumption: 2850.0 | Sanctioned Load: 700.0 | Difference: 2150.0 | EXCEEDING
+Z03    East Zone	Total Consumption: 2300.0 | Sanctioned Load: 600.0 | Difference: 1700.0 | EXCEEDING
+Z04    West Zone	Total Consumption: 3100.0 | Sanctioned Load: 800.0 | Difference: 2300.0 | EXCEEDING
+Z05    Central Zone	Total Consumption: 3310.0 | Sanctioned Load: 1000.0 | Difference: 2310.0 | EXCEEDING
+--------------------------------------------------------------------------------------------------------
+
+4. KEY FINDING:
+--------------------------------------------------------------------------------------------------------
+All 5 zones are exceeding their sanctioned load.
+
+Highest excess:
+  Central Zone (Z05) → 2310.00 units above sanctioned load
+
+Lowest excess:
+  North Zone (Z01) → 1260.00 units above sanctioned load
+
+Total cluster excess:
+  9720.00 units above the combined sanctioned load
+--------------------------------------------------------------------------------------------------------
