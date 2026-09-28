@@ -1,63 +1,86 @@
 import java.io.*;
-import java.util.*;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class MyMapper extends Mapper<LongWritable, Text, Text, DoubleWritable> {
+public class ZoneConsumptionMapper
+        extends Mapper<LongWritable, Text, Text, Text> {
 
-    private Map<String, Double> sanctionedLoad = new HashMap<>();
+    private Map<String, String> zoneMap = new HashMap<>();
 
     @Override
-    protected void setup(Context context) throws IOException {
+    protected void setup(Context context)
+            throws IOException {
 
-        BufferedReader br = new BufferedReader(
-            new FileReader("zones.csv")
-        );
+        URI[] files = context.getCacheFiles();
 
-        String line;
+        for (URI file : files) {
+            BufferedReader br = new BufferedReader(
+                    new FileReader(new File(file.getPath()))
+            );
 
-        // Skip header
-        br.readLine();
+            String line;
 
-        while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
 
-            String[] parts = line.split(",");
+                String[] parts = line.split(",");
 
-            String zoneCode = parts[0];
-            double load = Double.parseDouble(parts[2]);
+                // zones.csv:
+                // zoneCode,zoneName,sanctionedLoadMW
 
-            sanctionedLoad.put(zoneCode, load);
+                String zoneCode = parts[0].trim();
+                String zoneName = parts[1].trim();
+                String sanctionedLoad = parts[2].trim();
+
+                zoneMap.put(
+                    zoneCode,
+                    zoneName + "," + sanctionedLoad
+                );
+            }
+
+            br.close();
         }
-
-        br.close();
     }
 
     @Override
-    public void map(LongWritable key, Text value, Context context)
+    protected void map(LongWritable key, Text value,
+                       Context context)
             throws IOException, InterruptedException {
 
         String line = value.toString();
 
         // Skip header
-        if (line.startsWith("meterId")) {
+        if (line.toLowerCase().contains("zonecode"))
             return;
-        }
 
         String[] parts = line.split(",");
 
-        String zoneCode = parts[1];
-        double operatingLoad = Double.parseDouble(parts[3]);
+        // meter.csv:
+        // meterId,zoneCode,unitsConsumed
 
-        if (sanctionedLoad.containsKey(zoneCode)) {
+        String zoneCode = parts[1].trim();
+        String consumption = parts[2].trim();
 
-            double sanctioned = sanctionedLoad.get(zoneCode);
+        if (zoneMap.containsKey(zoneCode)) {
 
-            double percentage =
-                    (operatingLoad / sanctioned) * 100.0;
+            String[] zoneInfo = zoneMap.get(zoneCode).split(",");
+
+            String zoneName = zoneInfo[0];
+            String sanctionedLoad = zoneInfo[1];
+
+            // key = zoneCode
+            // value = zoneName,consumption,sanctionedLoad
 
             context.write(
                 new Text(zoneCode),
-                new DoubleWritable(percentage)
+                new Text(
+                    zoneName + "," +
+                    consumption + "," +
+                    sanctionedLoad
+                )
             );
         }
     }
