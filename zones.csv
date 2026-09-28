@@ -1,0 +1,6 @@
+zoneCode,zoneName,sanctionedLoadMW
+Z01,North Zone,500
+Z02,South Zone,700
+Z03,East Zone,600
+Z04,West Zone,800
+Z05,Central Zone,1000

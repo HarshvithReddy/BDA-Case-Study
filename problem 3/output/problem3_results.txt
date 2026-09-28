@@ -1,0 +1,60 @@
+========================================================================================================
+  CBIT - DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
+  BIG DATA ANALYTICS (22CSE19 PE-I) - END-TO-END BIG DATA ANALYTICS CASE STUDY
+  TEAM 8: VoltGrid Utilities — Smart Grid Energy Analytics
+  PROBLEM 3: What is the average consumption per meter within each zone?
+========================================================================================================
+
+1. EXECUTIVE SUMMARY & BUSINESS METRICS:
+--------------------------------------------------------------------------------------------------------
+Zone Name       Zone Code  Sanctioned Load  Total Units   Unique Meters  Avg Consumption/Meter  Status
+--------------------------------------------------------------------------------------------------------
+Central Zone    Z05        1000 MW          3310.00 u     3 meters       1103.33 units/meter    Highest Avg
+West Zone       Z04         800 MW          3100.00 u     3 meters       1033.33 units/meter    High Avg
+South Zone      Z02         700 MW          2850.00 u     3 meters        950.00 units/meter    Moderate
+East Zone       Z03         600 MW          2300.00 u     3 meters        766.67 units/meter    Moderate-Low
+North Zone      Z01         500 MW          1760.00 u     3 meters        586.67 units/meter    Lowest Avg
+--------------------------------------------------------------------------------------------------------
+TOTAL CLUSTER:             3600 MW         13320.00 u    15 meters        888.00 units/meter
+--------------------------------------------------------------------------------------------------------
+
+2. DETAILED METER-LEVEL CONSUMPTION BREAKDOWN:
+--------------------------------------------------------------------------------------------------------
+Zone: North Zone (Z01) | Sanctioned Load: 500 MW
+  - Meter M001: 120 + 130 + 140 = 390.0 units (3 readings | Avg: 130.00 u/reading)
+  - Meter M002: 180 + 190 + 200 = 570.0 units (3 readings | Avg: 190.00 u/reading)
+  - Meter M003: 250 + 270 + 280 = 800.0 units (3 readings | Avg: 266.67 u/reading)
+  >> Zone Average Per Meter = 1760.00 / 3 = 586.67 units
+
+Zone: South Zone (Z02) | Sanctioned Load: 700 MW
+  - Meter M004: 200 + 210 + 220 = 630.0 units (3 readings | Avg: 210.00 u/reading)
+  - Meter M005: 280 + 290 + 300 = 870.0 units (3 readings | Avg: 290.00 u/reading)
+  - Meter M006: 420 + 450 + 480 = 1350.0 units (3 readings | Avg: 450.00 u/reading)
+  >> Zone Average Per Meter = 2850.00 / 3 = 950.00 units
+
+Zone: East Zone (Z03) | Sanctioned Load: 600 MW
+  - Meter M007: 150 + 160 + 170 = 480.0 units (3 readings | Avg: 160.00 u/reading)
+  - Meter M008: 220 + 230 + 240 = 690.0 units (3 readings | Avg: 230.00 u/reading)
+  - Meter M009: 350 + 380 + 400 = 1130.0 units (3 readings | Avg: 376.67 u/reading)
+  >> Zone Average Per Meter = 2300.00 / 3 = 766.67 units
+
+Zone: West Zone (Z04) | Sanctioned Load: 800 MW
+  - Meter M010: 180 + 190 + 200 = 570.0 units (3 readings | Avg: 190.00 u/reading)
+  - Meter M011: 300 + 320 + 340 = 960.0 units (3 readings | Avg: 320.00 u/reading)
+  - Meter M012: 500 + 520 + 550 = 1570.0 units (3 readings | Avg: 523.33 u/reading)
+  >> Zone Average Per Meter = 3100.00 / 3 = 1033.33 units
+
+Zone: Central Zone (Z05) | Sanctioned Load: 1000 MW
+  - Meter M013: 250 + 260 + 270 = 780.0 units (3 readings | Avg: 260.00 u/reading)
+  - Meter M014: 350 + 370 + 390 = 1110.0 units (3 readings | Avg: 370.00 u/reading)
+  - Meter M015: 450 + 470 + 500 = 1420.0 units (3 readings | Avg: 473.33 u/reading)
+  >> Zone Average Per Meter = 3310.00 / 3 = 1103.33 units
+
+3. RAW HADOOP MAPREDUCE OUTPUT (from HDFS /output/problem3/part-r-00000):
+--------------------------------------------------------------------------------------------------------
+Central Zone	Avg Per Meter:  1103.33 units | Total Zone Consumption: 3310.00 units | Unique Meters:  3 | Readings:  9 | Meters: [M015: 1420.0u, M014: 1110.0u, M013: 780.0u]
+East Zone	Avg Per Meter:   766.67 units | Total Zone Consumption: 2300.00 units | Unique Meters:  3 | Readings:  9 | Meters: [M008: 690.0u, M007: 480.0u, M009: 1130.0u]
+North Zone	Avg Per Meter:   586.67 units | Total Zone Consumption: 1760.00 units | Unique Meters:  3 | Readings:  9 | Meters: [M003: 800.0u, M002: 570.0u, M001: 390.0u]
+South Zone	Avg Per Meter:   950.00 units | Total Zone Consumption: 2850.00 units | Unique Meters:  3 | Readings:  9 | Meters: [M004: 630.0u, M006: 1350.0u, M005: 870.0u]
+West Zone	Avg Per Meter:  1033.33 units | Total Zone Consumption: 3100.00 units | Unique Meters:  3 | Readings:  9 | Meters: [M011: 960.0u, M010: 570.0u, M012: 1570.0u]
+========================================================================================================
