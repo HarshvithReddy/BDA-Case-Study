@@ -1,1 +1,220 @@
+========================================================================================================
+CBIT - DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING
+BIG DATA ANALYTICS (22CSE19 PE-I) - END-TO-END BIG DATA ANALYTICS CASE STUDY
+TEAM 8: VoltGrid Utilities — Smart Grid Energy Analytics
+PROBLEM 2: Which zone is operating closest to, or exceeding, its sanctioned load limit?
+=======================================================================================
 
+========================================================================================================
+
+1. EXECUTIVE SUMMARY & BUSINESS METRICS
+   ========================================================================================================
+
+---
+
+## Zone Name       Zone Code    Sanctioned Load    Max Operating Load    Max Load %       Status
+
+West Zone       Z04          800 MW             550 MW                68.75%           Closest
+South Zone      Z02          700 MW             480 MW                68.57%           High
+East Zone       Z03          600 MW             400 MW                66.67%           High
+North Zone      Z01          500 MW             280 MW                56.00%           Moderate
+Central Zone    Z05          1000 MW            500 MW                50.00%           Lowest
+---------------------------------------------------------------------------------------------
+
+HIGHEST USAGE:
+Z04 - West Zone - 68.75%
+
+---
+
+========================================================================================================
+2. DETAILED ZONE-WISE LOAD BREAKDOWN
+====================================
+
+---
+
+## ZONE: NORTH ZONE (Z01)
+
+Sanctioned Load       : 500 MW
+Maximum Operating Load: 280 MW
+Load Percentage       : (280 / 500) × 100
+Zone Load Usage       : 56.00%
+
+---
+
+## ZONE: SOUTH ZONE (Z02)
+
+Sanctioned Load       : 700 MW
+Maximum Operating Load: 480 MW
+Load Percentage       : (480 / 700) × 100
+Zone Load Usage       : 68.57%
+
+---
+
+## ZONE: EAST ZONE (Z03)
+
+Sanctioned Load       : 600 MW
+Maximum Operating Load: 400 MW
+Load Percentage       : (400 / 600) × 100
+Zone Load Usage       : 66.67%
+
+---
+
+## ZONE: WEST ZONE (Z04)
+
+Sanctioned Load       : 800 MW
+Maximum Operating Load: 550 MW
+Load Percentage       : (550 / 800) × 100
+Zone Load Usage       : 68.75%
+
+---
+
+## ZONE: CENTRAL ZONE (Z05)
+
+Sanctioned Load       : 1000 MW
+Maximum Operating Load: 500 MW
+Load Percentage       : (500 / 1000) × 100
+Zone Load Usage       : 50.00%
+
+---
+
+========================================================================================================
+3. MAPREDUCE PROCESSING
+=======================
+
+---
+
+## MAPPER
+
+* Reads electricity readings from readings.csv.
+* Reads sanctioned load information from zones.csv.
+* Identifies the zone code for each reading.
+* Calculates the load percentage for each reading.
+* Emits:
+
+  ```
+    Zone Code  →  Load Percentage
+  ```
+
+---
+
+## REDUCER
+
+* Receives all load percentages for each zone.
+* Finds the maximum load percentage for each zone.
+* Emits:
+
+  ```
+    Zone Code  →  Maximum Load Percentage
+  ```
+
+---
+
+========================================================================================================
+4. RAW HADOOP MAPREDUCE OUTPUT
+==============================
+
+HDFS OUTPUT PATH:
+/output/problem2/part-r-00000
+
+---
+
+Z01     56.00000000000001
+Z02     68.57142857142857
+Z03     66.66666666666666
+Z04     68.75
+Z05     50.0
+
+---
+
+========================================================================================================
+5. HADOOP EXECUTION
+===================
+
+---
+
+## STEP 1: COMPILE JAVA PROGRAMS
+
+Command:
+
+javac -cp "$(hadoop classpath)" MyMapper.java MyReducer.java Driver.java
+
+---
+
+## STEP 2: CREATE JAR FILE
+
+Command:
+
+jar -cvf zone-load.jar MyMapper.class MyReducer.class Driver.class
+
+---
+
+## STEP 3: CHECK HDFS INPUT FILES
+
+Command:
+
+hdfs dfs -ls /input/voltgrid
+
+Input Files:
+
+/input/voltgrid/readings.csv
+/input/voltgrid/zones.csv
+
+---
+
+## STEP 4: REMOVE PREVIOUS OUTPUT
+
+Command:
+
+hdfs dfs -rm -r -f /output/problem2
+
+---
+
+## STEP 5: RUN MAPREDUCE JOB
+
+Command:
+
+hadoop jar zone-load.jar Driver
+
+---
+
+## STEP 6: DISPLAY HADOOP OUTPUT
+
+Command:
+
+hdfs dfs -cat /output/problem2/part-r-00000
+
+---
+
+## EXECUTION RESULT
+
+Map Input Records       : 46
+Map Output Records      : 45
+Reduce Input Groups     : 5
+Reduce Output Records   : 5
+Job Status              : Successfully Completed
+
+---
+
+========================================================================================================
+6. FINAL RESULT
+===============
+
+---
+
+## ZONE OPERATING CLOSEST TO SANCTIONED LOAD LIMIT
+
+Z04 - West Zone - 68.75%
+
+---
+
+West Zone has the highest operating-load percentage among the five zones
+and is therefore operating closest to its sanctioned load limit.
+
+No zone exceeds its sanctioned load limit because all calculated
+percentages are below 100%.
+
+---
+
+========================================================================================================
+END OF PROBLEM 2
+================
