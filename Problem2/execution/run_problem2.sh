@@ -1,30 +1,51 @@
 #!/bin/bash
-set -e
 
-echo "=============================================================="
-echo "TEAM 8: VoltGrid Utilities"
-echo "Problem 2: Zone Operating Load vs Sanctioned Load"
-echo "=============================================================="
+echo "======================================"
+echo " Problem 2 - Zone Consumption"
+echo "======================================"
 
-echo "[1/5] Compiling Java files..."
-rm -f *.class
-javac -cp "$(hadoop classpath)" MyMapper.java MyReducer.java Driver.java
-echo "Compilation successful."
+echo "[1] Removing old output..."
 
-echo "[2/5] Creating JAR..."
-jar -cvf zone-load.jar MyMapper.class MyReducer.class Driver.class
-echo "JAR created successfully."
+hdfs dfs -rm -r -f /output/problem2
 
-echo "[3/5] Checking HDFS input..."
-hdfs dfs -ls /input/voltgrid
+echo "[2] Compiling Java programs..."
 
-echo "[4/5] Running MapReduce job..."
-hdfs dfs -rm -r -f /output/problem2 || true
-hadoop jar zone-load.jar Driver
+javac -classpath "$(hadoop classpath)" \
+    ZoneConsumptionMapper.java \
+    ZoneConsumptionReducer.java \
+    ZoneConsumptionDriver.java
 
-echo "[5/5] Showing result..."
-echo "--------------------------------------------------------------"
+if [ $? -ne 0 ]; then
+    echo "Compilation failed!"
+    exit 1
+fi
+
+echo "[3] Creating JAR..."
+
+jar -cvf problem2.jar \
+    ZoneConsumptionMapper*.class \
+    ZoneConsumptionReducer*.class \
+    ZoneConsumptionDriver*.class
+
+echo "[4] Running Hadoop MapReduce..."
+
+hadoop jar problem2.jar \
+    ZoneConsumptionDriver \
+    /input/voltgrid/readings.csv \
+    /output/problem2 \
+    /input/voltgrid/zones.csv
+
+if [ $? -ne 0 ]; then
+    echo "MapReduce job failed!"
+    exit 1
+fi
+
+echo "======================================"
+echo " FINAL OUTPUT"
+echo "======================================"
+
 hdfs dfs -cat /output/problem2/part-r-00000
-echo "--------------------------------------------------------------"
 
-echo "Job completed successfully."
+echo "======================================"
+echo " Problem 2 Completed"
+echo "======================================"
